@@ -7,7 +7,7 @@ export const goals = pgTable('goals', {
     .primaryKey()
     .$defaultFn(() => createId()),
   title: text('title').notNull(),
-  desiredWeeklyFrequency: integer('desired_weekly_frequency').notNull(),
+  desiredWeeklyFrequency: integer('desired_weekly_frequency').notNull(), // É a quantidade de metas
   createdAt: timestamp('created_at', { withTimezone: true }) //esse timezone tem a ver com fuso horario do local
     .notNull()
     .defaultNow(), //quando cadastrar uma nova meta vai ser cadastrado com a data atual

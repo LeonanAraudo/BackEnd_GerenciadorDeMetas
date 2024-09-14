@@ -1,36 +1,24 @@
 import fastify from 'fastify'
-import { createGoals } from '../functions/create-goal'
-import z from 'zod' //usa pra fazer validação
 import {
   serializerCompiler,
   validatorCompiler,
-  type ZodTypeProvider
+  type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
+
+import { createGoalRoute } from './routes/create-goal'
+import { createCompletionRoute } from './routes/create-completions'
+import { getPendingGoalsRoute } from './routes/get-pendding-goals'
+import { getWeekSummaryRoute } from './routes/get-week-sumary'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
+app.register(createGoalRoute)  //aqui ele ta criando o plugin, que seria permitir que as rotas estejam em arquivos diferentes
+app.register(createCompletionRoute)
+app.register(getPendingGoalsRoute)
+app.register(getWeekSummaryRoute)
+
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
-
-app.post(
-  '/goals',
-  {
-    schema: { // ta usando o schema do zod aqui nessa opção para validar os atributos
-      body: z.object({
-        title: z.string(),
-        desiredWeeklyFrequency: z.number().int().min(1).max(7),
-      }),
-    },
-  },
-
-  async request => {
-    const {title,desiredWeeklyFrequency } = request.body
-    await createGoals({
-      title,
-      desiredWeeklyFrequency,
-    })
-  }
-)
 
 app
   .listen({
