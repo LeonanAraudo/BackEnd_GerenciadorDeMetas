@@ -1,0 +1,6 @@
+{
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "biomejs.biome"
+}
+
+//dentro desse peojeto toda vez que eu salvar o arquivo o biome vai fazer a correção do arquivo no caso formatação
