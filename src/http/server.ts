@@ -9,6 +9,7 @@ import { createGoalRoute } from './routes/create-goal'
 import { createCompletionRoute } from './routes/create-completions'
 import { getPendingGoalsRoute } from './routes/get-pendding-goals'
 import { getWeekSummaryRoute } from './routes/get-week-sumary'
+import fastifyCors from '@fastify/cors'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -16,6 +17,9 @@ app.register(createGoalRoute)  //aqui ele ta criando o plugin, que seria permiti
 app.register(createCompletionRoute)
 app.register(getPendingGoalsRoute)
 app.register(getWeekSummaryRoute)
+app.register(fastifyCors,{
+  origin: "*" //Isso permite que o front acesse o back, em produção coloque a url do seu ao inves de *
+})
 
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)

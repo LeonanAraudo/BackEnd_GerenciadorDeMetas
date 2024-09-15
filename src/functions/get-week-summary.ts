@@ -1,4 +1,4 @@
-import { count, lte } from 'drizzle-orm'
+import { and, count, eq, gte, lte, sql } from 'drizzle-orm'
 import { db } from '../db'
 import { goalCompletions, goals } from '../db/schema'
 import dayjs from 'dayjs'
@@ -20,25 +20,62 @@ export async function getWeekSummary() {
       .where(lte(goals.createdAt, lastDayOfWeek)) //quer selecionar todas as metas onde a data de criação delas seja menor ou igual ao ultimo dia da semana
   )
 
-  // Retorna a contagem de metas conlcuidas dentro dessa semana
-  const goalCompletionCounts = db.$with('goal_completion_counts').as(
+  //Pega a lista de todas as metas que completei
+  const goalsCompletedInWeek = db.$with('goals_completed_in_week').as(
     db
       .select({
-        //ta meio que fazendo um calculo de quantas vezes a meta foi concluida
-        goalId: goalCompletions.goalId,
-        completionCount: count(goalCompletions.id).as('completionCount'),
+        id: goals.id,
+        title: goals.title,
+        completedAt: goalCompletions.createdAt, //vai ter a data completa com horario
+        completedAtDate: sql`
+        DATE(${goalCompletions.createdAt}) 
+        `.as('completedAtDate'), //vai pegar somente a data sem horario
       })
       .from(goalCompletions)
+      .innerJoin(goals, eq(goals.id, goalCompletions.goalId))
       .where(
         and(
           gte(goalCompletions.createdAt, firstDayOfWeek),
           lte(goalCompletions.createdAt, lastDayOfWeek)
         )
       )
-      .groupBy(goalCompletions.goalId) //ta agrupando pelo id da meta
   )
 
+  //vai pegar os dados da goalsCompletedInweek e agrupa-los pela data
+  const goalsCompletedByWeekDay = db.$with('goals_completed_by_week_day').as(
+    db
+      .select({
+        completedAtDate: goalsCompletedInWeek.completedAtDate,
+        completions: sql`
+       JSON_AGG(
+        JSON_BUILD_OBJECT(
+          'id', ${goalsCompletedInWeek.id},
+          'title', ${goalsCompletedInWeek.title},
+          'completedAt', ${goalsCompletedInWeek.completedAt}
+        )
+       )
+      `.as('completions'),
+        //As informações do bd estão todas soltas, ao realizar esse select vou fazer um objeto com uma data, e dentro desse objeto vai ter um atributo com os array de objetos,que no caso seriam as metas referentes a aquela data
+        //JSON_AGG pega o retorno do postgres e converte em array
+        //JSON_BUILD_OBJECT vai criar o objeto
+      })
+      .from(goalsCompletedInWeek)
+      .groupBy(goalsCompletedInWeek.completedAtDate)
+  )
+
+  const result = await db
+    .with(goalsCreatedUpToWeek, goalsCompletedInWeek, goalsCompletedByWeekDay)
+    .select({
+      completed: sql`(SELECT COUNT(*) FROM ${goalsCompletedInWeek})`.mapWith(Number), // ta pegando a quantidade de metas completadas
+      total: sql`(SELECT SUM(${goalsCreatedUpToWeek.desiredWeeklyFrequency}) FROM ${goalsCreatedUpToWeek})`.mapWith(Number), //ta pegando a quatidade de vezes em que as metas devem ser feita na semana e soamando-as
+      goalsPerDay: sql`JSON_OBJECT_AGG(
+       ${goalsCompletedByWeekDay.completedAtDate},
+       ${goalsCompletedByWeekDay.completions}
+      )`
+    })
+    .from(goalsCompletedByWeekDay)
+
   return {
-    summary: 'teste',
+    summary: result,
   }
 }
