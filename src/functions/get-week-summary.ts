@@ -34,6 +34,7 @@ export async function getWeekSummary() {
       })
       .from(goalCompletions)
       .innerJoin(goals, eq(goals.id, goalCompletions.goalId))
+      .orderBy(desc(goalCompletions.createdAt))
       .where(
         and(
           gte(goalCompletions.createdAt, firstDayOfWeek),
