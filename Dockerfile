@@ -1,16 +1,17 @@
-# Etapa de build
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+
+# Garante a instalação com devDependencies
 RUN npm install
 
 COPY . .
 
-RUN npm run build
+# Executa o build com npx
+RUN npx tsc
 
-# Etapa final (imagem leve)
 FROM node:18-alpine
 
 WORKDIR /app
