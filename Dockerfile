@@ -4,12 +4,14 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 
-# Garante a instalação com devDependencies
 RUN npm install
 
 COPY . .
 
-# Executa o build com npx
+# Corrige permissões no tsc
+RUN chmod +x ./node_modules/.bin/tsc
+
+# Executa build
 RUN npx tsc
 
 FROM node:18-alpine
