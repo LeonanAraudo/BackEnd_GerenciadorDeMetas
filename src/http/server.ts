@@ -26,7 +26,8 @@ app.setSerializerCompiler(serializerCompiler)
 
 app
   .listen({
-    port: 3333,
+     port: Number(process.env.PORT) || 3333, // usa PORT do ambiente ou 3333 como fallback
+    host: '0.0.0.0',
   })
   .then(() => {
     console.log('HTTP server runing')
