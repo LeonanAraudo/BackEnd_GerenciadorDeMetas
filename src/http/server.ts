@@ -18,7 +18,7 @@ app.register(createCompletionRoute)
 app.register(getPendingGoalsRoute)
 app.register(getWeekSummaryRoute)
 app.register(fastifyCors,{
-  origin: "https://front-end-gerenciador-de-metas.vercel.app" //Isso permite que o front acesse o back, em produção coloque a url do seu ao inves de *
+  origin: "https://inorbit-leoproject.vercel.app" //Isso permite que o front acesse o back, em produção coloque a url do seu ao inves de *
 })
 
 app.setValidatorCompiler(validatorCompiler)
