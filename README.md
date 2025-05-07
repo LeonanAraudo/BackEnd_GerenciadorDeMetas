@@ -9,7 +9,7 @@ Este é o back-end do projeto **in.orbit**, uma aplicação moderna para gerenci
 ```bash
 git clone https://github.com/LeonanAraudo/BackEnd_GerenciadorDeMetas
 ```
-### 2. Crie um arquivo .env na raiz com suas variáveis de ambiente, como:
+### 2. Crie um arquivo .env na raiz com suas variáveis de ambiente.Será necessário ter um banco de dados PostgreSQL configurado:
 ```bash
 DATABASE_URL=postgres://user:password@localhost:5432/nome_do_banco
 ```
@@ -26,6 +26,19 @@ npm run dev
 yarn dev
 ```
 O projeto será iniciado em: http://localhost:3333
+
+## 🛠️ Extra – Migrations
+
+Após configurar o banco de dados, será necessário gerar e aplicar as migrations:
+
+### 📄 Gerar migrations
+```bash
+npx drizzle-kit generate
+```
+### 📦 Aplicar migrations no banco de dados
+```bash
+npx drizzle-kit migrate
+```
 ## 🚀 Tecnologias Utilizadas
 
 - **Drizzle ORM** – Utilizado para realizar consultas ao banco de dados de forma segura e tipada.
